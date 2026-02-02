@@ -1,11 +1,5 @@
 ## Getting Started
 ```bash
-git clone --recursive https://github.com/Polytonic/Glitter
-cd Glitter
-cd Build
-```
-
-```bash
 # Microsoft Windows
 cmake -S .. -B .
 ...
