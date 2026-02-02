@@ -1,12 +1,12 @@
-[submodule "Boiler/Vendor/glfw"]
-	path = Boiler/Vendor/glfw
+[submodule "BlackHoleTracer/Vendor/glfw"]
+	path = BlackHoleTracer/Vendor/glfw
 	url = https://github.com/glfw/glfw.git
 	branch = master
-[submodule "Boiler/Vendor/glm"]
-	path = Boiler/Vendor/glm
+[submodule "BlackHoleTracer/Vendor/glm"]
+	path = BlackHoleTracer/Vendor/glm
 	url = https://github.com/g-truc/glm.git
 	branch = master
-[submodule "Boiler/Vendor/glad"]
-	path = Boiler/Vendor/glad
+[submodule "BlackHoleTracer/Vendor/glad"]
+	path = BlackHoleTracer/Vendor/glad
 	url = https://github.com/Dav1dde/glad.git
 	branch = c

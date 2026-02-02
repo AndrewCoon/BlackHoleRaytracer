@@ -1,32 +1,33 @@
 cmake_minimum_required(VERSION 3.15)
-project(Boiler)
+project(BlackHoleTracer)
 
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
-add_subdirectory(Boiler/Vendor/glfw)
+add_subdirectory(BlackHoleTracer/Vendor/glfw)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    add_compile_options(/W4)
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
-    if(NOT WIN32)
-        set(GLAD_LIBRARIES dl)
-    endif()
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-include_directories(Boiler/Headers/
-                    Boiler/Vendor/glad/include/
-                    Boiler/Vendor/glfw/include/
-                    Boiler/Vendor/glm/)
+include_directories(BlackHoleTracer/Headers/
+                    BlackHoleTracer/Vendor/glad/include/
+                    BlackHoleTracer/Vendor/glfw/include/
+                    BlackHoleTracer/Vendor/glm/)
 
-file(GLOB VENDORS_SOURCES Boiler/Vendor/glad/src/glad.c)
-file(GLOB PROJECT_HEADERS Boiler/Headers/*.hpp)
-file(GLOB PROJECT_SOURCES Boiler/Sources/*.cpp)
-file(GLOB PROJECT_SHADERS Boiler/Shaders/*.comp
-                          Boiler/Shaders/*.frag
-                          Boiler/Shaders/*.geom
-                          Boiler/Shaders/*.vert)
+file(GLOB VENDORS_SOURCES BlackHoleTracer/Vendor/glad/src/glad.c)
+file(GLOB PROJECT_HEADERS BlackHoleTracer/Headers/*.hpp)
+file(GLOB PROJECT_SOURCES BlackHoleTracer/Sources/*.cpp)
+file(GLOB PROJECT_SHADERS BlackHoleTracer/Shaders/*.comp
+                          BlackHoleTracer/Shaders/*.frag
+                          BlackHoleTracer/Shaders/*.geom
+                          BlackHoleTracer/Shaders/*.vert)
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
                          .gitattributes
@@ -50,5 +51,5 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Boiler/Shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/BlackHoleTracer/Shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>
     DEPENDS ${PROJECT_SHADERS})

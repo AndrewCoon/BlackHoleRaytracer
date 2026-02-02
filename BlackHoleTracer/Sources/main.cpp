@@ -18,7 +18,7 @@ int main(int argc, char * argv[]) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
+    auto mWindow = glfwCreateWindow(mWidth, mHeight, "BlackHoleTracer", nullptr, nullptr);
 
     // Check for Valid Context
     if (mWindow == nullptr) {
@@ -29,7 +29,7 @@ int main(int argc, char * argv[]) {
     // Create Context and Load OpenGL Functions
     glfwMakeContextCurrent(mWindow);
     gladLoadGL();
-    fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
+    fprintf(stderr, "BlackHoleTracer %s\n", glGetString(GL_VERSION));
 
     // Rendering Loop
     while (glfwWindowShouldClose(mWindow) == false) {
