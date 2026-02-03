@@ -13,16 +13,21 @@
 #include <memory>
 
 namespace Config {
-    // Window Settings
     constexpr int WINDOW_WIDTH = 512;
     constexpr float ASPECT_RATIO = 16.0f / 9.0f;
     constexpr int WINDOW_HEIGHT = (int)(WINDOW_WIDTH / ASPECT_RATIO);
 
     constexpr const char* WINDOW_TITLE = "Black Hole Raytracer";
+}
 
-    // Viewport Settings
+namespace ViewportConfig {
     constexpr float VIEWPORT_HEIGHT = 2.0f;
-    constexpr float VIEWPORT_WIDTH = VIEWPORT_HEIGHT * WINDOW_WIDTH / WINDOW_HEIGHT;
+    constexpr float VIEWPORT_WIDTH = VIEWPORT_HEIGHT * Config::WINDOW_WIDTH / Config::WINDOW_HEIGHT;
+}
+
+namespace CameraConfig {
+    float FOCAL_LENGTH = 1.0f;
+    glm::vec3 CAMERA_POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 namespace RayConfig {

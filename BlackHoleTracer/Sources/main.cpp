@@ -26,7 +26,6 @@ void checkKeys(GLFWwindow* mWindow) {
 }
 
 int main() {
-
     // Load GLFW and Create a Window
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
