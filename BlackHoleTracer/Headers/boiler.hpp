@@ -26,8 +26,8 @@ namespace ViewportConfig {
 }
 
 namespace CameraConfig {
-    float FOCAL_LENGTH = 1.0f;
-    glm::vec3 CAMERA_POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
+    constexpr float FOCAL_LENGTH = 1.0f;
+    constexpr glm::vec3 CAMERA_POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 namespace RayConfig {

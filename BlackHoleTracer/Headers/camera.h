@@ -13,6 +13,12 @@ public:
     
     // Accessors
     glm::vec3 GetOrigin() const { return m_Origin; }
+    glm::vec3 GetUpperLeftCorner() const { return m_UpperLeftCorner; }
+    glm::vec3 GetHorizontal() const { return m_Horizontal; }
+    glm::vec3 GetVertical() const { return m_Vertical; }
+    glm::vec3 GetPixelDeltaU() const { return m_pixel_delta_u; }
+    glm::vec3 GetPixelDeltaV() const { return m_pixel_delta_v; }
+    glm::vec3 GetPixel00Location() const { return m_pixel00_loc; }
     
 private:
     // Camera parameters
