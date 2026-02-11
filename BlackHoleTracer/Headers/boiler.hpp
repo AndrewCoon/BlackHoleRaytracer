@@ -21,6 +21,7 @@ namespace Constants {
 
 namespace Config {
     constexpr int WINDOW_WIDTH = 1024;
+    constexpr int SCALE_FACTOR = 8;
     constexpr float ASPECT_RATIO = 16.0f / 9.0f;
     constexpr int WINDOW_HEIGHT = (int)(WINDOW_WIDTH / ASPECT_RATIO);
 

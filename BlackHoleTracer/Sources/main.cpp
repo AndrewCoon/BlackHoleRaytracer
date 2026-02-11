@@ -50,8 +50,8 @@ static glm::dvec3 March_RK4(glm::dvec3 loc, glm::dvec3& vel, BlackHole bh, doubl
 BlackHole bh(0.5, glm::dvec3(0.0, 0.0, -10.0));
 
 void update(FrameBuffer& framebuffer, Camera& camera) {
-    for (int j = 0; j < Config::WINDOW_HEIGHT; j+=4) {
-        for (int i = 0; i < Config::WINDOW_WIDTH; i+=4) {
+    for (int j = 0; j < Config::WINDOW_HEIGHT; j+=Config::SCALE_FACTOR) {
+        for (int i = 0; i < Config::WINDOW_WIDTH; i+=Config::SCALE_FACTOR) {
             // Center of pixel that this ray is looking at
             glm::vec3 pixel_center = camera.GetPixel00Location() + ((float)i * camera.GetPixelDeltaU()) + ((float)j * camera.GetPixelDeltaV());
             glm::vec3 ray_direction = pixel_center - camera.GetOrigin();
@@ -94,7 +94,11 @@ void update(FrameBuffer& framebuffer, Camera& camera) {
             }
 
             // Fix: Use 'j' instead of '0'
-            framebuffer.SetPixel(i, j, color);
+            for (int k = 0; k < Config::SCALE_FACTOR; k++) {
+                for (int l = 0; l < Config::SCALE_FACTOR; l++) {
+                    framebuffer.SetPixel(i + k, j + l, color);
+                }
+            }
         }
     }
 }
