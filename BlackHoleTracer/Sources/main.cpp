@@ -14,9 +14,12 @@
 #include <cstdio>
 #include <cstdlib>
 
-
 static glm::dvec3 NewtonianAcceleration(glm::dvec3 loc, BlackHole bh) {
-    return Constants::G * bh.getMass() * (bh.getPosition() - loc) / (double) glm::pow(glm::length(bh.getPosition() - loc), 3);
+    // return Constants::G * bh.getMass() * (bh.getPosition() - loc) / (double) glm::pow(glm::length(bh.getPosition() - loc), 3);
+    glm::dvec3 dir = bh.getPosition() - loc;
+    double d2 = glm::dot(dir, dir); // dist squared
+    double d3 = d2 * glm::sqrt(d2); // dist cubed
+    return Constants::G * bh.getMass() * dir / d3;
 }
 
 static double DistanceToSphere(glm::dvec3 p, glm::dvec3 c, double r) {
@@ -89,8 +92,8 @@ void update(FrameBuffer& framebuffer, Camera& camera) {
                     }
                     break;
                 }
-                
-                loc = March_RK4(loc, vel, bh, Constants::dt * glm::max(bh_dist * 0.5, 1.0));
+
+                loc = March_RK4(loc, vel, bh, Constants::dt * glm::max(bh_dist * 0.5, 1.0));          
             }
 
             // Fix: Use 'j' instead of '0'
@@ -111,6 +114,15 @@ void render(Display& display, FrameBuffer& framebuffer) {
 void checkKeys(GLFWwindow* mWindow) {
     if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(mWindow, true);
+    
+    // static bool keyWasPressed = false;
+    // bool keyIsPressed = glfwGetKey(mWindow, GLFW_KEY_????) == GLFW_PRESS;
+
+    // if (keyIsPressed && !keyWasPressed) {
+    //     // Do stuff
+    //     printf("State: %s\n", variable ? "ON" : "OFF");
+    // }
+    // keyWasPressed = keyIsPressed;
 }
 
 int main() {
@@ -138,19 +150,20 @@ int main() {
     Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
     Camera camera;
 
-    double startTime = glfwGetTime();
-        update(framebuffer, camera);
-        render(display, framebuffer);
-
-        // Flip Buffers and Draw
-        glfwSwapBuffers(mWindow);
-    double endTime = glfwGetTime(); // Capture end time
-    double sPerFrame = (endTime - startTime);
-    printf("Frame time: %.2f s\n", sPerFrame);
-
     // Rendering Loop
     while (glfwWindowShouldClose(mWindow) == false) {
         checkKeys(mWindow);
+
+        double startTime = glfwGetTime();
+            update(framebuffer, camera);
+            render(display, framebuffer);
+
+            // Flip Buffers and Draw
+            glfwSwapBuffers(mWindow);
+        double endTime = glfwGetTime(); // Capture end time
+        double sPerFrame = (endTime - startTime);
+        printf("Frame time: %.2f s\n", sPerFrame);
+        
         glfwPollEvents();
     }   
     
