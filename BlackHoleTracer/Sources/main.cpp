@@ -134,13 +134,16 @@ int main() {
     Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
     Camera camera;
 
-            
+    double startTime = glfwGetTime();
         update(framebuffer, camera);
         render(display, framebuffer);
 
         // Flip Buffers and Draw
         glfwSwapBuffers(mWindow);
         glfwPollEvents();
+    double endTime = glfwGetTime(); // Capture end time
+    double sPerFrame = (endTime - startTime);
+    printf("Frame time: %.2f s\n", sPerFrame);
 
     // Rendering Loop
     while (glfwWindowShouldClose(mWindow) == false) {
