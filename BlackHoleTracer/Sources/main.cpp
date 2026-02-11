@@ -14,38 +14,83 @@
 #include <cstdio>
 #include <cstdlib>
 
-static float DistanceToSphere(glm::vec3 p, glm::vec3 c, float r) {
+
+static glm::dvec3 NewtonianAcceleration(glm::dvec3 loc, BlackHole bh) {
+    return Constants::G * bh.getMass() * (bh.getPosition() - loc) / (double) glm::pow(glm::length(bh.getPosition() - loc), 3);
+}
+
+static double DistanceToSphere(glm::dvec3 p, glm::dvec3 c, double r) {
     return glm::length(p - c) - r;
 }
 
-static glm::vec3 March(Ray r, glm::vec3 loc) {
-    return loc + RayConfig::STEP_SIZE * glm::normalize(r.GetDirection());
+static glm::dvec3 March_Euler(glm::dvec3 loc, glm::dvec3& vel, BlackHole bh) {
+    vel += glm::normalize(Constants::dt * NewtonianAcceleration(loc, bh));
+    return loc + Constants::dt * vel;
+}
+
+static glm::dvec3 March_RK4(glm::dvec3 loc, glm::dvec3& vel, BlackHole bh, double dt = Constants::dt) {
+    glm::dvec3 k1v = NewtonianAcceleration(loc, bh);
+    glm::dvec3 k1x = vel;
+
+    glm::dvec3 k2v = NewtonianAcceleration(loc + dt / 2.0f * k1x, bh);
+    glm::dvec3 k2x = vel + dt / 2.0f * k1v;
+
+    glm::dvec3 k3v = NewtonianAcceleration(loc + dt / 2.0f * k2x, bh);
+    glm::dvec3 k3x = vel + dt / 2.0f * k2v;
+
+    glm::dvec3 k4v = NewtonianAcceleration(loc + dt * k3x, bh); 
+    glm::dvec3 k4x = vel + dt * k3v;
+
+    vel = vel + dt / 6 * (k1v + 2.0 * k2v + 2.0 * k3v + k4v);
+    
+    return loc + dt / 6 * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
 }
 
 // Camera looks towards -z
-BlackHole bh(3.85f * glm::pow(10.0f, 26.0f), glm::vec3(0.0f, 0.0f, -4.0f));
+BlackHole bh(0.5, glm::dvec3(0.0, 0.0, -10.0));
 
 void update(FrameBuffer& framebuffer, Camera& camera) {
-    for (int j = 0; j < Config::WINDOW_HEIGHT; j++) {
-        for (int i = 0; i < Config::WINDOW_WIDTH; i++) {
+    for (int j = 0; j < Config::WINDOW_HEIGHT; j+=4) {
+        for (int i = 0; i < Config::WINDOW_WIDTH; i+=4) {
             // Center of pixel that this ray is looking at
             glm::vec3 pixel_center = camera.GetPixel00Location() + ((float)i * camera.GetPixelDeltaU()) + ((float)j * camera.GetPixelDeltaV());
             glm::vec3 ray_direction = pixel_center - camera.GetOrigin();
             
             Ray ray(camera.GetOrigin(), ray_direction);
 
-            // Miss color
-            glm::vec3 color = glm::vec3(0.1f, 0.6f, 0.4f);
+            // Default Color
+            // Orbit color????
+            glm::vec3 color = glm::vec3(1.0f, 0.6f, 0.4f);
 
-            glm::vec3 loc = March(ray, ray.GetOrigin());
+            glm::dvec3 loc = ray.GetOrigin();
+            glm::dvec3 vel = (glm::dvec3) glm::normalize(ray.GetDirection()) * Constants::c;
 
             for (int k = 1; k < RayConfig::MAX_STEPS; k++) {
-                if (DistanceToSphere(loc, bh.getPosition(), bh.getRadius()) < 0.0f) {
+                double bh_dist = DistanceToSphere(loc, bh.getPosition(), bh.getRadius());
+
+                if (bh_dist < 0.0) {
+                    // bh color
                     color = glm::vec3(0.0f);
                     break;
-                } else {
-                    loc = March(ray, loc);
                 }
+
+                if (bh_dist > (bh.getRadius() * 20.0)) {
+                // Look at the final velocity (the direction the ray is pointing)
+                    glm::dvec3 final_dir = glm::normalize(vel);
+                    
+                    // Create a simple checkerboard based on the direction
+                    // Scaling the direction components to create the grid pattern
+                    double pattern = std::sin(final_dir.x * 10.0) * std::sin(final_dir.y * 10.0) * std::sin(final_dir.z * 10.0);
+
+                    if (pattern > 0.0) {
+                        color = glm::vec3(1.0f, 1.0f, 1.0f); // White
+                    } else {
+                        color = glm::vec3(0.0f, 0.0f, 1.0f); // Blue
+                    }
+                    break;
+                }
+                
+                loc = March_RK4(loc, vel, bh, Constants::dt * glm::max(bh_dist * 0.5, 1.0));
             }
 
             // Fix: Use 'j' instead of '0'
@@ -89,16 +134,18 @@ int main() {
     Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
     Camera camera;
 
-    // Rendering Loop
-    while (glfwWindowShouldClose(mWindow) == false) {
-        checkKeys(mWindow);
-        
+            
         update(framebuffer, camera);
         render(display, framebuffer);
 
         // Flip Buffers and Draw
         glfwSwapBuffers(mWindow);
         glfwPollEvents();
+
+    // Rendering Loop
+    while (glfwWindowShouldClose(mWindow) == false) {
+        checkKeys(mWindow);
+
     }   
     
     glfwTerminate();
