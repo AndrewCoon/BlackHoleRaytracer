@@ -12,8 +12,15 @@
 #include <vector>
 #include <memory>
 
+namespace Constants {
+    constexpr float dt = 0.01f;
+    constexpr float PI = 3.14159265359f;
+    constexpr float c = 299792458.0f;
+    constexpr float G = 6.67408e-11f;
+}
+
 namespace Config {
-    constexpr int WINDOW_WIDTH = 512;
+    constexpr int WINDOW_WIDTH = 256;
     constexpr float ASPECT_RATIO = 16.0f / 9.0f;
     constexpr int WINDOW_HEIGHT = (int)(WINDOW_WIDTH / ASPECT_RATIO);
 
@@ -31,7 +38,8 @@ namespace CameraConfig {
 }
 
 namespace RayConfig {
-    constexpr int MAX_BOUNCES = 5;
     constexpr float EPSILON = 0.0001f;
+    constexpr float STEP_SIZE = 0.1f;
+    constexpr int MAX_STEPS = 100;
 }
 #endif // Header

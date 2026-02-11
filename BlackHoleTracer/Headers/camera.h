@@ -23,7 +23,7 @@ public:
 private:
     // Camera parameters
     glm::vec3 m_Origin;
-    glm::vec3 m_UpperLeftCorner;
+    glm::vec3 m_UpperLeftCorner;    
     glm::vec3 m_Horizontal;
     glm::vec3 m_Vertical;
 
