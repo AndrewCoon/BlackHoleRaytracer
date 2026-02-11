@@ -144,7 +144,6 @@ int main() {
 
         // Flip Buffers and Draw
         glfwSwapBuffers(mWindow);
-        glfwPollEvents();
     double endTime = glfwGetTime(); // Capture end time
     double sPerFrame = (endTime - startTime);
     printf("Frame time: %.2f s\n", sPerFrame);
@@ -152,7 +151,7 @@ int main() {
     // Rendering Loop
     while (glfwWindowShouldClose(mWindow) == false) {
         checkKeys(mWindow);
-
+        glfwPollEvents();
     }   
     
     glfwTerminate();
