@@ -6,17 +6,17 @@ Display::Display(int width, int height)
     m_Height(height) 
 {
     InitializeOpenGL();
+    CreateQuad();
+    CreateShaders();
 }
 
 Display::~Display() {
     if (m_VAO) glDeleteVertexArrays(1, &m_VAO);
     if (m_VBO) glDeleteBuffers(1, &m_VBO);
     if (m_TextureID) glDeleteTextures(1, &m_TextureID);
-    if (m_ShaderProgram) glDeleteProgram(m_ShaderProgram);
 }
 
 void Display::InitializeOpenGL() {
-    // Creates texture
     glGenTextures(1, &m_TextureID);
     glBindTexture(GL_TEXTURE_2D, m_TextureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -26,8 +26,6 @@ void Display::InitializeOpenGL() {
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_FLOAT, nullptr);
 
-    CreateQuad();
-    CreateShaders();
 }
 
 void Display::CreateQuad() {
@@ -55,46 +53,8 @@ void Display::CreateQuad() {
     glEnableVertexAttribArray(1);
 }
 
-void Display::CreateShaders() {
-    const char* vertexShaderSource = R"(
-        #version 330 core
-        layout(location = 0) in vec3 aPos;
-        layout(location = 1) in vec2 aTex;
-        out vec2 TexCoord;
-        
-        void main() {
-            gl_Position = vec4(aPos, 1.0);
-            TexCoord = aTex;
-        }
-    )";
-    
-    const char* fragmentShaderSource = R"(
-        #version 330 core
-        out vec4 FragColor;
-        in vec2 TexCoord;
-        uniform sampler2D screenTexture;
-        
-        void main() {
-            FragColor = texture(screenTexture, TexCoord);
-        }
-    )";
-    
-    // Compile vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-   
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    m_ShaderProgram = glCreateProgram();
-    glAttachShader(m_ShaderProgram, vertexShader);
-    glAttachShader(m_ShaderProgram, fragmentShader);
-    glLinkProgram(m_ShaderProgram);
-    
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+void Display::CreateShaders() { 
+    m_ShaderProgram = new Shader("blackhole.vert", "blackhole.frag");
 }
 
 void Display::UploadFramebuffer(const FrameBuffer& fb) {
@@ -104,7 +64,7 @@ void Display::UploadFramebuffer(const FrameBuffer& fb) {
 
 void Display::Draw() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram(m_ShaderProgram);
+    m_ShaderProgram->use();
     glBindTexture(GL_TEXTURE_2D, m_TextureID);
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);

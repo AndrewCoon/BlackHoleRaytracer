@@ -3,6 +3,7 @@
 
 #include "boiler.hpp"
 #include "framebuffer.h"
+#include "shader.h"
 
 class Display {
 public:
@@ -16,6 +17,7 @@ public:
     // Utility
     int GetWidth() const { return m_Width; }
     int GetHeight() const { return m_Height; }
+    Shader* GetShader() const { return m_ShaderProgram; }
     
 private:
     void InitializeOpenGL();
@@ -25,7 +27,7 @@ private:
     // OpenGL resources
     GLuint m_TextureID;
     GLuint m_VAO, m_VBO;
-    GLuint m_ShaderProgram;
+    Shader* m_ShaderProgram;
     
     int m_Width, m_Height;
 };
