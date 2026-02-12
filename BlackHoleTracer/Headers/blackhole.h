@@ -6,9 +6,9 @@ public:
         m_radius_s = 2 * Constants::G * m_mass / (Constants::c * Constants::c);
     }
 
-    double getMass() const { return m_mass; }
-    glm::dvec3 getPosition() const { return m_position; }
-    double getRadius() const { return m_radius_s;}
+    double GetMass() const { return m_mass; }
+    glm::dvec3 GetPosition() const { return m_position; }
+    double GetRadius() const { return m_radius_s;}
 
 private:
     double m_mass;

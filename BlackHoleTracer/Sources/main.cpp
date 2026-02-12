@@ -16,10 +16,10 @@
 
 static glm::dvec3 NewtonianAcceleration(glm::dvec3 loc, BlackHole bh) {
     // return Constants::G * bh.getMass() * (bh.getPosition() - loc) / (double) glm::pow(glm::length(bh.getPosition() - loc), 3);
-    glm::dvec3 dir = bh.getPosition() - loc;
+    glm::dvec3 dir = bh.GetPosition() - loc;
     double d2 = glm::dot(dir, dir); // dist squared
     double d3 = d2 * glm::sqrt(d2); // dist cubed
-    return Constants::G * bh.getMass() * dir / d3;
+    return Constants::G * bh.GetMass() * dir / d3;
 }
 
 static double DistanceToSphere(glm::dvec3 p, glm::dvec3 c, double r) {
@@ -69,7 +69,7 @@ void update(FrameBuffer& framebuffer, Camera& camera) {
             glm::dvec3 vel = (glm::dvec3) glm::normalize(ray.GetDirection()) * Constants::c;
 
             for (int k = 1; k < RayConfig::MAX_STEPS; k++) {
-                double bh_dist = DistanceToSphere(loc, bh.getPosition(), bh.getRadius());
+                double bh_dist = DistanceToSphere(loc, bh.GetPosition(), bh.GetRadius());
 
                 if (bh_dist < 0.0) {
                     // bh color
@@ -77,7 +77,7 @@ void update(FrameBuffer& framebuffer, Camera& camera) {
                     break;
                 }
 
-                if (bh_dist > (bh.getRadius() * 20.0)) {
+                if (bh_dist > (bh.GetRadius() * 20.0)) {
                 // Look at the final velocity (the direction the ray is pointing)
                     glm::dvec3 final_dir = glm::normalize(vel);
                     
