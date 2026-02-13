@@ -1,3 +1,6 @@
+#ifndef BLACKHOLE_H
+#define BLACKHOLE_H
+
 #include "boiler.hpp"
 
 class BlackHole {
@@ -15,3 +18,4 @@ private:
     double m_radius_s;
     glm::dvec3 m_position;
 };
+#endif

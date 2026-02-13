@@ -6,7 +6,7 @@
 
 class Camera {
 public:
-    Camera(const glm::vec3 pos) : m_Origin(pos) {}
+    Camera(const glm::vec3 pos);
     
     // Generate a ray for pixel coordinates (i, j) in image of size (width, height)
     Ray GetRay(float u, float v) const;

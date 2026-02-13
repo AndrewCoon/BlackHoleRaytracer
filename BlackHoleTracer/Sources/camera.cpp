@@ -1,6 +1,7 @@
 #include "camera.h"
 
 Camera::Camera(const glm::vec3 pos) {
+    m_Origin = pos;
     m_Horizontal = glm::vec3(ViewportConfig::VIEWPORT_WIDTH, 0.0f, 0.0f);
     m_Vertical = glm::vec3(0.0f, ViewportConfig::VIEWPORT_HEIGHT, 0.0f);
     m_UpperLeftCorner = m_Origin - m_Horizontal / 2.0f - m_Vertical / 2.0f - glm::vec3(0.0f, 0.0f, CameraConfig::FOCAL_LENGTH);

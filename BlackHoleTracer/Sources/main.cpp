@@ -48,10 +48,10 @@ int main() {
     gladLoadGL();
     fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
 
-    BlackHole blackhole(2, glm::dvec3(0.0, 0.0, -3.0));
+    BlackHole blackhole(2, glm::dvec3(0.0, 0.0, -30.0));
 
     Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
-    Camera camera;
+    Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
     printf("Black Hole State: Mass = %.2f, Radius = %.2f, Position = (%.2f, %.2f, %.2f)\n", 
            blackhole.GetMass(), 
@@ -65,7 +65,7 @@ int main() {
         checkKeys(mWindow);
 
         double startTime = glfwGetTime();
-            display.UpdateUniforms(camera.GetOrigin(), blackhole.GetPosition());
+            display.UpdateUniforms(camera, blackhole);
             display.Draw();
 
             glfwSwapBuffers(mWindow);

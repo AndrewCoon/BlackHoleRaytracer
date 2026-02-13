@@ -65,8 +65,10 @@ void Display::Draw() {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Display::UpdateUniforms(const glm::vec3& camPos, const glm::vec3& bhPos) {
+void Display::UpdateUniforms(const Camera& camera, const BlackHole& bh) {
     m_ShaderProgram->use();
-    m_ShaderProgram->setVec3("cameraPos", camPos);
-    m_ShaderProgram->setVec3("bhPos", bhPos);
+    m_ShaderProgram->setVec3("cameraPos", camera.GetOrigin());
+    m_ShaderProgram->setVec3("bhPos", bh.GetPosition());
+    m_ShaderProgram->setFloat("bhMass", bh.GetMass());
+    m_ShaderProgram->setFloat("bhRadius", bh.GetRadius());
 } 

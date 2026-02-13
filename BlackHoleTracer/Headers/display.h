@@ -3,6 +3,8 @@
 
 #include "boiler.hpp"
 #include "shader.h"
+#include "camera.h"
+#include "blackhole.h"
 
 class Display {
 public:
@@ -11,7 +13,7 @@ public:
     
     // Main interface
     void Draw();
-    void UpdateUniforms(const glm::vec3& camPos, const glm::vec3& bhPos);
+    void UpdateUniforms(const Camera& camera, const BlackHole& bh);
     
     // Utility
     int GetWidth() const { return m_Width; }
