@@ -2,8 +2,9 @@
 #define DISPLAY_H
 
 #include "boiler.hpp"
-#include "framebuffer.h"
 #include "shader.h"
+#include "camera.h"
+#include "blackhole.h"
 
 class Display {
 public:
@@ -11,8 +12,8 @@ public:
     ~Display();
     
     // Main interface
-    void UploadFramebuffer(const FrameBuffer& fb);
     void Draw();
+    void UpdateUniforms(const Camera& camera, const BlackHole& bh);
     
     // Utility
     int GetWidth() const { return m_Width; }
