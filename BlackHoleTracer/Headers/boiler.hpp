@@ -33,6 +33,5 @@ namespace ViewportConfig {
 
 namespace CameraConfig {
     constexpr float FOCAL_LENGTH = 1.0f;
-    constexpr glm::vec3 CAMERA_POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 #endif // Header
