@@ -2,7 +2,6 @@
 #define DISPLAY_H
 
 #include "boiler.hpp"
-#include "framebuffer.h"
 #include "shader.h"
 
 class Display {
@@ -11,8 +10,8 @@ public:
     ~Display();
     
     // Main interface
-    void UploadFramebuffer(const FrameBuffer& fb);
     void Draw();
+    void UpdateUniforms(const glm::vec3& camPos, const glm::vec3& bhPos);
     
     // Utility
     int GetWidth() const { return m_Width; }

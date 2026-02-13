@@ -13,7 +13,6 @@
 #include <memory>
 
 namespace Constants {
-    constexpr double dt = 0.03;
     constexpr double PI = 3.14159265359;
     constexpr double c = 1.0;
     constexpr double G = 1.0;
@@ -21,7 +20,6 @@ namespace Constants {
 
 namespace Config {
     constexpr int WINDOW_WIDTH = 1024;
-    constexpr int SCALE_FACTOR = 8;
     constexpr float ASPECT_RATIO = 16.0f / 9.0f;
     constexpr int WINDOW_HEIGHT = (int)(WINDOW_WIDTH / ASPECT_RATIO);
 
@@ -36,11 +34,5 @@ namespace ViewportConfig {
 namespace CameraConfig {
     constexpr float FOCAL_LENGTH = 1.0f;
     constexpr glm::vec3 CAMERA_POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
-}
-
-namespace RayConfig {
-    constexpr double EPSILON = 0.0001;
-    constexpr double STEP_SIZE = 0.1;
-    constexpr int MAX_STEPS = 500;
 }
 #endif // Header

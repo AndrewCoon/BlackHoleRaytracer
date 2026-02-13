@@ -57,11 +57,6 @@ void Display::CreateShaders() {
     m_ShaderProgram = new Shader("blackhole.vert", "blackhole.frag");
 }
 
-void Display::UploadFramebuffer(const FrameBuffer& fb) {
-    glBindTexture(GL_TEXTURE_2D, m_TextureID);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGB, GL_FLOAT, fb.GetData());
-}
-
 void Display::Draw() {
     glClear(GL_COLOR_BUFFER_BIT);
     m_ShaderProgram->use();
@@ -69,3 +64,9 @@ void Display::Draw() {
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
+
+void Display::UpdateUniforms(const glm::vec3& camPos, const glm::vec3& bhPos) {
+    m_ShaderProgram->use();
+    m_ShaderProgram->setVec3("cameraPos", camPos);
+    m_ShaderProgram->setVec3("bhPos", bhPos);
+} 
