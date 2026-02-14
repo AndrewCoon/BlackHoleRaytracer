@@ -2,15 +2,19 @@
 out vec4 FragColor;
 in vec2 TexCoord;
 
-uniform vec3 camOrigin;
+uniform vec3 camPos;
+uniform mat4 invView;
+
 uniform vec3 bhPos;
 uniform float bhRadius;
 uniform float bhMass;
 
+uniform float u_aspectRatio;
+
 const float G = 1.0;
 const float c = 1.0;
-const float dt = 0.1;
-const int MAX_STEPS = 1000;
+const float dt = 0.05;
+const int MAX_STEPS = 10000;
 
 vec3 NewtonianAcceleration(vec3 loc) {
     vec3 dir = bhPos - loc;
@@ -40,13 +44,16 @@ void March_RK4(inout vec3 loc, inout vec3 vel, float c_dt) {
 
 void main() {
     vec2 uv = TexCoord * 2.0 - 1.0;
-    
-    vec3 rayDir = normalize(vec3(uv.x, uv.y, -1.0));
+    uv.x *= u_aspectRatio;
 
-    vec3 loc = camOrigin;
+    vec3 rayDirCam = normalize(vec3(uv.x, uv.y, -1.0));
+    
+    vec3 rayDir = normalize((invView * vec4(rayDirCam, 0.0)).xyz);
+    
+    vec3 loc = camPos;
     vec3 vel = rayDir * c;
 
-    vec3 pixelColor = vec3(0.1, 0.1, 0.15).rgb;
+    vec3 pixelColor = vec3(1.0, 0.1, 0.15).rgb;
 
     for (int i = 0; i < MAX_STEPS; i++) {
         float bhDist = length(loc - bhPos);

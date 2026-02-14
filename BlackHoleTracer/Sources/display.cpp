@@ -67,8 +67,16 @@ void Display::Draw() {
 
 void Display::UpdateUniforms(const Camera& camera, const BlackHole& bh) {
     m_ShaderProgram->use();
-    m_ShaderProgram->setVec3("cameraPos", camera.GetOrigin());
+
+    glm::vec3 camPos = camera.GetPosition();
+    glm::mat4 view = glm::lookAt(camPos, bh.GetPosition(), glm::vec3(0, 1, 0));
+    m_ShaderProgram->setMat4("invView", glm::inverse(view));
+    m_ShaderProgram->setVec3("camPos", camPos);
+
     m_ShaderProgram->setVec3("bhPos", bh.GetPosition());
     m_ShaderProgram->setFloat("bhMass", bh.GetMass());
     m_ShaderProgram->setFloat("bhRadius", bh.GetRadius());
+
+    float aspectRatio = (float)Config::WINDOW_WIDTH / (float)Config::WINDOW_HEIGHT;
+    m_ShaderProgram->setFloat("u_aspectRatio", aspectRatio);
 } 

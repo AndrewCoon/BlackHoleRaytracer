@@ -2,35 +2,40 @@
 #define CAMERA_H
 
 #include "boiler.hpp"
-#include "ray.h"
 
 class Camera {
 public:
-    Camera(const glm::vec3 pos);
-    
-    // Generate a ray for pixel coordinates (i, j) in image of size (width, height)
-    Ray GetRay(float u, float v) const;
+    Camera() {}
+    Camera(float radius, float azimuth, float polar) : radius(radius), azimuth(azimuth), polar(polar) {}
     
     // Accessors
-    glm::vec3 GetOrigin() const { return m_Origin; }
-    glm::vec3 GetUpperLeftCorner() const { return m_UpperLeftCorner; }
-    glm::vec3 GetHorizontal() const { return m_Horizontal; }
-    glm::vec3 GetVertical() const { return m_Vertical; }
-    glm::vec3 GetPixelDeltaU() const { return m_pixel_delta_u; }
-    glm::vec3 GetPixelDeltaV() const { return m_pixel_delta_v; }
-    glm::vec3 GetPixel00Location() const { return m_pixel00_loc; }
+    float GetRadius() const { return radius; }
+    float GetAzimuth() const { return azimuth; }
+    float GetPolar() const { return polar; }
+
+    glm::vec3 GetPosition() const {
+        return glm::vec3(
+            radius * sin(polar) * cos(azimuth),
+            radius * cos(polar),
+            radius * sin(polar) * sin(azimuth)
+        );
+    }
+
+    // This creates the look-at rotation
+    glm::mat4 GetViewMatrix() const {
+        return glm::lookAt(GetPosition(), glm::vec3(0,0,0), glm::vec3(0,1,0));
+    }
+    
+    // Mutators
+    void SetRadius(float r) { radius = r; }
+    void SetAzimuth(float a) { azimuth = a; }
+    void SetPolar(float p) { polar = p; }
     
 private:
     // Camera parameters
-    glm::vec3 m_Origin;
-    glm::vec3 m_UpperLeftCorner;    
-    glm::vec3 m_Horizontal;
-    glm::vec3 m_Vertical;
-
-    // U is horizontal V is vertical
-    glm::vec3 m_pixel_delta_u;
-    glm::vec3 m_pixel_delta_v;
-    glm::vec3 m_pixel00_loc;
+    float radius = 10.0f;
+    float azimuth = 0.0f;
+    float polar = Constants::PI / 2.0f;
 };
 
 #endif

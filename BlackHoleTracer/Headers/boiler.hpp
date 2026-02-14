@@ -13,14 +13,15 @@
 #include <memory>
 
 namespace Constants {
-    constexpr double PI = 3.14159265359;
-    constexpr double c = 1.0;
-    constexpr double G = 1.0;
+    constexpr float PI = 3.14159265359f;
+    constexpr float c = 1.0f;
+    constexpr float G = 1.0f;
 }
 
 namespace Config {
     constexpr int WINDOW_WIDTH = 1024;
     constexpr float ASPECT_RATIO = 16.0f / 9.0f;
+    // constexpr float ASPECT_RATIO = 1.0f;
     constexpr int WINDOW_HEIGHT = (int)(WINDOW_WIDTH / ASPECT_RATIO);
 
     constexpr const char* WINDOW_TITLE = "Black Hole Raytracer";
