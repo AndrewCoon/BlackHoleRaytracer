@@ -23,6 +23,26 @@ vec3 NewtonianAcceleration(vec3 loc) {
     return G * bhMass * dir / d3;
 }
 
+vec3 ToSpherical(vec3 vec) {
+    float r = length(vec);
+    float theta = acos(vec.z / r);
+    float phi = atan(vec.y, vec.x);
+
+    return vec3(r, theta, phi);
+}
+
+vec3 ToCartesian(vec3 vec) {
+    float r = vec.x;
+    float theta = vec.y;
+    float phi = vec.z;
+
+    float x = r * sin(theta) * cos(phi);
+    float y = r * sin(theta) * sin(phi);
+    float z = r * cos(theta);
+
+    return vec3(x, y, z);
+}
+
 void March_RK4(inout vec3 loc, inout vec3 vel, float c_dt) {
     vec3 k1v = NewtonianAcceleration(loc);
     vec3 k1x = vel;
