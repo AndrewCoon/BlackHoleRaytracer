@@ -1,8 +1,11 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 // Local Headers
 #include "boiler.hpp"
 #include "display.h"
 #include "camera.h"
 #include "blackhole.h"
+#include "stb_image.h"
 
 // System Headers
 #include <glad/glad.h>
@@ -14,12 +17,47 @@
 // Headers
 #include <cstdio>
 #include <cstdlib>
+#include <string>
+
+// Assets/*imagename.hdr*
+const std::string SKYBOX_PATH = "assets/eso0926a - eagle nebula.hdr";
+GLuint skyboxTextureID;
 
 bool useRelativity = true;
 bool showDisk = true;
 
 bool isDragging = false;
 double lastX, lastY;
+
+void InitializeScene() {
+    // ... setup VAO/VBO for screen-filling quad ...
+
+    // 2. Load the HDR image
+    int width, height, nrComponents;
+    stbi_set_flip_vertically_on_load(true); 
+    
+    // Use loadf for float data
+    float* data = stbi_loadf(SKYBOX_PATH.c_str(), &width, &height, &nrComponents, 0);
+    
+    if (data) {
+        glGenTextures(1, &skyboxTextureID);
+        glBindTexture(GL_TEXTURE_2D, skyboxTextureID);
+        
+        // 3. Upload to GPU
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, data);
+        
+        // 4. Set Texture Parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+        std::cout << "Successfully loaded HDR" << std::endl;
+    } else {
+        std::cerr << "Failed to load HDR image!" << std::endl;
+    }
+}
 
 void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole) {
     ImGui_ImplOpenGL3_NewFrame();
@@ -166,6 +204,8 @@ int main() {
 
     ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
     ImGui_ImplOpenGL3_Init("#version 400");
+
+    // Skybox setup
 
     // Initialize scene objects and settings
     BlackHole blackhole(2.0f, glm::vec3(0.0f, 0.0f, 0.0f));

@@ -6,9 +6,15 @@ Core Infrastructure
 
     [x] Create Debug UI Window (Sliders for bhMass, bhPos, and stepSize)
 
-    [x] Camera Controls (Middle-mouse orbit, scroll zoom, and Shift-drag pan)
+    [x] Camera Orbit (Middle-mouse drag)
+    
+    [x] Camera Zoom (Scroll wheel)
+    
+    [ ] Camera Pan (Shift-drag)
 
-    [?] FPS & Performance Monitor (Real-time frame time and step count display)
+    [x] FPS Monitor (Real-time frame time display)
+
+    [ ] Step Count Display (Show ray-march iteration count)
 
 Visual Environment
 
