@@ -19,9 +19,20 @@ endif()
 include_directories(BlackHoleTracer/Headers/
                     BlackHoleTracer/Vendor/glad/include/
                     BlackHoleTracer/Vendor/glfw/include/
-                    BlackHoleTracer/Vendor/glm/)
+                    BlackHoleTracer/Vendor/glm/
+                    BlackHoleTracer/Vendor/imgui/
+                    BlackHoleTracer/Vendor/imgui/backends/)
 
-file(GLOB VENDORS_SOURCES BlackHoleTracer/Vendor/glad/src/glad.c)
+file(GLOB VENDORS_SOURCES BlackHoleTracer/Vendor/glad/src/glad.c
+                          BlackHoleTracer/Vendor/imgui/imgui.cpp
+                          BlackHoleTracer/Vendor/imgui/imgui_tables.cpp
+                          BlackHoleTracer/Vendor/imgui/imgui_demo.cpp
+                          BlackHoleTracer/Vendor/imgui/imgui_draw.cpp
+                          BlackHoleTracer/Vendor/imgui/imgui_widgets.cpp
+
+                          BlackHoleTracer/Vendor/imgui/backends/imgui_impl_glfw.cpp
+                          BlackHoleTracer/Vendor/imgui/backends/imgui_impl_opengl3.cpp)
+                          
 file(GLOB PROJECT_HEADERS BlackHoleTracer/Headers/*.hpp)
 file(GLOB PROJECT_SOURCES BlackHoleTracer/Sources/*.cpp)
 file(GLOB PROJECT_SHADERS BlackHoleTracer/Shaders/*.comp
@@ -30,6 +41,7 @@ file(GLOB PROJECT_SHADERS BlackHoleTracer/Shaders/*.comp
                           BlackHoleTracer/Shaders/*.vert)
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
+                          TODO.md
                          .gitattributes
                          .gitignore
                          .gitmodules)
