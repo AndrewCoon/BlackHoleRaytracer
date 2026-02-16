@@ -55,9 +55,9 @@ vec3 ToCartesian(vec3 vec) {
 
 vec3 GeodesicAcceleration(vec3 loc, vec3 vel) {
     float r = length(loc);
-    
-    float factor = 1.0 - bhRadius / r;
     r = max(r, 0.001);
+
+    float factor = 1.0 - bhRadius / r;
 
     vec3 nLoc = loc / r;
 
@@ -84,7 +84,7 @@ void March_Geodesic_RK4(inout vec3 loc, inout vec3 vel, float c_dt) {
     loc += (c_dt / 6.0) * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
     vel += (c_dt / 6.0) * (k1v + 2.0 * k2v + 2.0 * k3v + k4v);
     
-    vel = normalize(vel) * c;
+    vel *= c / length(vel);
 }
 
 void March_Newtonian_RK4(inout vec3 loc, inout vec3 vel, float c_dt) {
@@ -122,22 +122,45 @@ void main() {
     for (int i = 0; i < MAX_STEPS; i++) {
         float bhDist = length(loc - bhPos);
 
+        float diskInner = bhRadius * 1.5;
+        float diskOuter = bhRadius * 6.0;
+        float r = length(loc - bhPos);
+
+        if (abs(loc.y - bhPos.y) < 0.02) {
+            if (r > diskInner && r < diskOuter) {
+                float t = (r - diskInner) / (diskOuter - diskInner);
+                vec3 diskColor = mix(vec3(1.0,0.8,0.3), vec3(1.0,0.2,0.0), t);
+                pixelColor = diskColor;
+                float redshift = sqrt(max(1.0 - bhRadius / r, 0.0));
+                pixelColor *= redshift;
+                break;
+            }
+        }
+
         if (bhDist < bhRadius * 1.05) {
             pixelColor = vec3(0.0, 0.0, 0.0);
             break;
         }
 
         if (bhDist > 50.0) {
-            // Escape checkerboard
             if (sin(vel.x * 10.0) * sin(vel.y * 10.0) * sin(vel.z * 10.0) > 0.0) {
                 pixelColor = vec3(0.1, 0.4, 0.4); // Light blue
             } else {
                 pixelColor = vec3(0.05, 0.0, 0.2); // Dark blue
             }
+
+            // vec3 dir = normalize(vel);
+            // vec2 sphereUV = vec2(
+            //     atan(dir.y, dir.x) / (2.0 * 3.1415926) + 0.5,
+            //     acos(dir.z) / 3.1415926
+            // );
+
+            float redshift = sqrt(max(1.0 - bhRadius / r, 0.0));
+            pixelColor *= redshift;
             break;
         }
 
-        float currentDt = dt * max(bhDist * 0.5, 1.0);
+        float currentDt = dt * clamp(bhDist * 0.2, 0.02, 5.0);
 
         // March_Newtonian_RK4(loc, vel, currentDt);
         March_Geodesic_RK4(loc, vel, currentDt);

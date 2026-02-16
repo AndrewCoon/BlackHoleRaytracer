@@ -13,6 +13,13 @@ public:
     glm::vec3 GetPosition() const { return m_position; }
     float GetRadius() const { return m_radius_s;}
 
+    void SetMass(float mass) { 
+        m_mass = mass; 
+        m_radius_s = 2 * Constants::G * m_mass / (Constants::c * Constants::c);
+    }
+    void SetPosition(glm::vec3 position) { m_position = position; }
+
+
 private:
     float m_mass;
     float m_radius_s;
