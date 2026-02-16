@@ -61,6 +61,15 @@ target_link_libraries(${PROJECT_NAME} glfw
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
+
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/assets)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/BlackHoleTracer/Assets
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/Assets
+    )
+endif() 
+
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/BlackHoleTracer/Shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>
