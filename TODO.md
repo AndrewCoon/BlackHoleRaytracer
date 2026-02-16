@@ -16,6 +16,8 @@ Core Infrastructure
 
     [ ] Step Count Display (Show ray-march iteration count)
 
+    [ ] Add button to save current frame to image
+
 Visual Environment
 
     [ ] HDR Skybox Implementation (Switch from checkerboard to equirectangular star map)

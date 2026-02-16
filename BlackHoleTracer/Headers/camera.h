@@ -12,6 +12,7 @@ public:
     float& Radius() { return radius; }
     float& Azimuth() { return azimuth; }
     float& Polar() { return polar; }
+    float& Zoom() { return zoom; }
 
     glm::vec3 GetPosition() const {
         return glm::vec3(
@@ -33,6 +34,7 @@ public:
     
 private:
     // Camera parameters
+    float zoom = 90.0f;
     float radius = 10.0f;
     float azimuth = 0.0f;
     float polar = Constants::PI / 2.0f;

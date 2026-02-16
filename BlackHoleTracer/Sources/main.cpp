@@ -1,5 +1,3 @@
-#define STB_IMAGE_IMPLEMENTATION
-
 // Local Headers
 #include "boiler.hpp"
 #include "display.h"
@@ -23,6 +21,7 @@
 const std::string SKYBOX_PATH = "assets/eso0926a - eagle nebula.hdr";
 GLuint skyboxTextureID;
 
+float bhSizeBuffer = 1.08f;
 bool useRelativity = true;
 bool showDisk = true;
 
@@ -69,7 +68,7 @@ void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole) {
     ImGui::Text("Black Hole Properties");
     ImGui::SliderFloat("Mass", &blackhole.Mass(), 0.1f, 10.0f);
     ImGui::Text("Schwarzschild Radius: %.3f", blackhole.Radius());
-    // ImGui::SliderFloat3("Position", &blackhole.Position().x, -10.0f, 10.0f);
+    ImGui::SliderFloat("Size Buffer", &bhSizeBuffer, 1.0f, 1.5f);
 
     ImGui::Separator();
     ImGui::Text("Simulation Parameters");
@@ -82,6 +81,7 @@ void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole) {
     ImGui::SliderFloat("Radius", &camera.Radius(), 1.0f, 50.0f);
     ImGui::SliderFloat("Azimuth", &camera.Azimuth(), -3.14159f, 3.14159f);
     ImGui::SliderFloat("Polar", &camera.Polar(), 0.0f, 3.14159f);
+    ImGui::SliderFloat("Zoom", &camera.Zoom(), 0.0f, 360.0f);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 
                 1000.0f / io.Framerate, io.Framerate);
@@ -98,7 +98,7 @@ void RenderScene(Display& display, Camera& camera, BlackHole& blackhole) {
     if (useRelativity) flags |= (1 << 0);
     if (showDisk) flags |= (1 << 1);
 
-    display.UpdateUniforms(camera, blackhole, flags);
+    display.UpdateUniforms(camera, blackhole, flags, bhSizeBuffer);
     display.Draw();
 }
 void PrintTelemetry(double startTime, double endTime, Camera& camera, BlackHole& bh) {
@@ -206,10 +206,10 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 400");
 
     // Skybox setup
-
+    InitializeScene();
     // Initialize scene objects and settings
     BlackHole blackhole(2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
-    Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
+    Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, SKYBOX_PATH);
     Camera camera(40.0f, 0.0f, 1.46f);
 
     // Set glfw pointers 

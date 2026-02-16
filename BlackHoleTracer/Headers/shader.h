@@ -72,5 +72,8 @@ class Shader {
         void setUInt(const std::string &name, uint32_t &value) const {
             glUniform1ui(glGetUniformLocation(ID, name.c_str()), value);
         }
+        void setInt(const std::string &name, int value) const {
+            glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+        }
 };
 #endif

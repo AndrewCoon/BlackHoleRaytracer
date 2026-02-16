@@ -7,6 +7,14 @@ uniform uint flags;
 uniform vec3 camPos;
 uniform mat4 invView;
 
+uniform float bhSizeBuffer;
+
+uniform sampler2D u_skybox; 
+uniform vec3 u_cameraDir;   
+uniform vec3 u_cameraRight; 
+uniform vec3 u_cameraUp;    
+uniform float u_fov;
+
 uniform vec3 bhPos;
 uniform float bhRadius;
 uniform float bhMass;
@@ -16,6 +24,7 @@ uniform float u_aspectRatio;
 const float G = 1.0;
 const float c = 1.0;
 const float dt = 0.05;
+const float PI = 3.14159265359;
 const int MAX_STEPS = 10000;
 
 vec3 NewtonianAcceleration(vec3 loc) {
@@ -90,71 +99,74 @@ void March_Newtonian_RK4(inout vec3 loc, inout vec3 vel, float c_dt) {
     loc += c_dt / 6.0 * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
 }
 
+vec2 DirectionToUV(vec3 dir) {
+    float phi = atan(dir.z, dir.x);
+    float theta = asin(dir.y);
+    
+    float u = 1.0 - (phi + PI) / (2.0 * PI);
+    float v = theta / PI + 0.5;
+    
+    return vec2(u, v);
+}
+
 void main() {
     bool useRelativity = (flags & (1u << 0)) != 0u;
     bool showDisk = (flags & (1u << 1)) != 0u;
 
-    vec2 uv = TexCoord * 2.0 - 1.0;
-    uv.x *= u_aspectRatio;
+    vec2 ndc = TexCoord * 2.0 - 1.0;
+    ndc.x *= u_aspectRatio;
 
-    vec3 rayDirCam = normalize(vec3(uv.x, uv.y, -1.0));
-    
+    float fovFactor = tan(u_fov * 0.5);
+    vec3 rayDirCam = normalize(vec3(ndc.x * fovFactor, ndc.y * fovFactor, -1.0));
     vec3 rayDir = normalize((invView * vec4(rayDirCam, 0.0)).xyz);
     
     vec3 loc = camPos;
     vec3 vel = rayDir * c;
 
-    vec3 pixelColor = vec3(1.0, 0.1, 0.15).rgb;
+    vec3 pixelColor = vec3(1.0);
 
     for (int i = 0; i < MAX_STEPS; i++) {
         float bhDist = length(loc - bhPos);
 
         float diskInner = bhRadius * 2;
         float diskOuter = bhRadius * 6.0;
-        float r = length(loc - bhPos);
 
-        if (abs(loc.y - bhPos.y) < 0.02 && showDisk) {
-            if (r > diskInner && r < diskOuter) {
-                float t = (r - diskInner) / (diskOuter - diskInner);
-                vec3 diskColor = mix(vec3(1.0,0.8,0.3), vec3(1.0,0.2,0.0), t);
-                pixelColor = diskColor;
-
-                float redshift = sqrt(max(1.0 - bhRadius / r, 0.0));
-                pixelColor *= redshift;
+        if (abs(loc.y - bhPos.y) < (0.01) && showDisk) {
+            if (bhDist > diskInner && bhDist < diskOuter) {
+                float t = (bhDist - diskInner) / (diskOuter - diskInner);
+                vec3 diskColor = mix(vec3(1.0, 0.7, 0.2), vec3(0.5, 0.1, 0.0), t);
+                
+                // Simple gravitational redshift for the disk
+                float redshift = sqrt(max(1.0 - bhRadius / bhDist, 0.01));
+                pixelColor = diskColor * redshift * 2.0;
                 break;
             }
         }
 
-        if (bhDist < bhRadius * 1.05) {
-            pixelColor = vec3(0.0, 0.0, 0.0);
+        if (bhDist < bhRadius * bhSizeBuffer) {
+            pixelColor = vec3(0.0);
             break;
         }
 
-        if (bhDist > 50.0) {
-            if (sin(vel.x * 10.0) * sin(vel.y * 10.0) * sin(vel.z * 10.0) > 0.0) {
-                pixelColor = vec3(0.1, 0.4, 0.4); // Light blue
-            } else {
-                pixelColor = vec3(0.05, 0.0, 0.2); // Dark blue
-            }
+        if (bhDist > 100.0) {
+            vec2 skyUV = DirectionToUV(normalize(vel));
+            pixelColor = texture(u_skybox, skyUV).rgb;
 
-            // vec3 dir = normalize(vel);
-            // vec2 sphereUV = vec2(
-            //     atan(dir.y, dir.x) / (2.0 * 3.1415926) + 0.5,
-            //     acos(dir.z) / 3.1415926
-            // );
-
-            float redshift = sqrt(max(1.0 - bhRadius / r, 0.0));
+            float redshift = sqrt(max(1.0 - bhRadius / bhDist, 0.05));
             pixelColor *= redshift;
             break;
         }
 
-        float currentDt = dt * clamp(bhDist * 0.2, 0.02, 5.0);
+        float currentDt = dt * clamp(bhDist * 0.5, 0.1, 10.0);
         if  (useRelativity) {
             March_Geodesic_RK4(loc, vel, currentDt);
         } else {
             March_Newtonian_RK4(loc, vel, currentDt);
         }
     }
+
+    pixelColor = pixelColor / (pixelColor + vec3(1.0));
+    pixelColor = pow(pixelColor, vec3(1.0 / 2.2));
 
     FragColor = vec4(pixelColor, 1.0);
 }

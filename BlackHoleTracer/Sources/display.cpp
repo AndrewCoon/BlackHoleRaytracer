@@ -1,24 +1,25 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "display.h"
 #include <iostream>
 
-Display::Display(int width, int height) 
-    : m_Width(width),
-    m_Height(height) 
-{
+Display::Display(int width, int height, const std::string& skyboxPath) 
+    : m_Width(width), m_Height(height) {
     InitializeOpenGL();
-    CreateQuad();
     CreateShaders();
+    CreateQuad();
+    LoadSkyboxTexture(skyboxPath);
 }
 
 Display::~Display() {
     if (m_VAO) glDeleteVertexArrays(1, &m_VAO);
     if (m_VBO) glDeleteBuffers(1, &m_VBO);
-    if (m_TextureID) glDeleteTextures(1, &m_TextureID);
+    if (m_SkyboxTextureID) glDeleteTextures(1, &m_SkyboxTextureID);
 }
 
 void Display::InitializeOpenGL() {
-    glGenTextures(1, &m_TextureID);
-    glBindTexture(GL_TEXTURE_2D, m_TextureID);
+    glGenTextures(1, &m_SkyboxTextureID);
+    glBindTexture(GL_TEXTURE_2D, m_SkyboxTextureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -26,6 +27,31 @@ void Display::InitializeOpenGL() {
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_FLOAT, nullptr);
 
+}
+
+void Display::LoadSkyboxTexture(const std::string& path) {
+    int width, height, nrComponents;
+    stbi_set_flip_vertically_on_load(true); 
+    
+    float* data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
+    
+    if (data) {
+        glGenTextures(1, &m_SkyboxTextureID);
+        glBindTexture(GL_TEXTURE_2D, m_SkyboxTextureID);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, data);
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+        std::cout << "Loaded HDR Skybox: " << path << std::endl;
+    } else {
+        std::cerr << "Failed to load HDR image: " << path << std::endl;
+        stbi_image_free(data);
+    }
 }
 
 void Display::CreateQuad() {
@@ -58,20 +84,26 @@ void Display::CreateShaders() {
 }
 
 void Display::Draw() {
-    glClear(GL_COLOR_BUFFER_BIT);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     m_ShaderProgram->use();
-    glBindTexture(GL_TEXTURE_2D, m_TextureID);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_SkyboxTextureID);
+
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags) {
+void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags, float& bhSizeBuffer) {
     m_ShaderProgram->use();
 
     glm::vec3 camPos = camera.GetPosition();
-    glm::mat4 view = glm::lookAt(camPos, bh.Position(), glm::vec3(0, 1, 0));
+    glm::mat4 view = camera.GetViewMatrix();
     m_ShaderProgram->setMat4("invView", glm::inverse(view));
+
     m_ShaderProgram->setVec3("camPos", camPos);
+    m_ShaderProgram->setFloat("u_fov", glm::radians(camera.Zoom()));
 
     m_ShaderProgram->setVec3("bhPos", bh.Position());
     m_ShaderProgram->setFloat("bhMass", bh.Mass());
@@ -80,5 +112,8 @@ void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags) {
     float aspectRatio = (float)Config::WINDOW_WIDTH / (float)Config::WINDOW_HEIGHT;
     m_ShaderProgram->setFloat("u_aspectRatio", aspectRatio);
 
+    m_ShaderProgram->setFloat("bhSizeBuffer", bhSizeBuffer);
+
     m_ShaderProgram->setUInt("flags", flags);
+    m_ShaderProgram->setInt("u_skybox", 0);
 } 
