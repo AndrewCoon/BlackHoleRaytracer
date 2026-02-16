@@ -1,6 +1,8 @@
-#version 330 core
+#version 400 core
 out vec4 FragColor;
 in vec2 TexCoord;
+
+uniform uint flags;
 
 uniform vec3 camPos;
 uniform mat4 invView;
@@ -19,7 +21,7 @@ const int MAX_STEPS = 10000;
 vec3 NewtonianAcceleration(vec3 loc) {
     vec3 dir = bhPos - loc;
     float d2 = dot(dir, dir);
-    float d3 = d2 * sqrt(d2); // Optimized dist cubed
+    float d3 = d2 * sqrt(d2); 
     return G * bhMass * dir / d3;
 }
 
@@ -107,6 +109,9 @@ void March_Newtonian_RK4(inout vec3 loc, inout vec3 vel, float c_dt) {
 }
 
 void main() {
+    bool useRelativity = (flags & (1u << 0)) != 0u;
+    bool showDisk = (flags & (1u << 1)) != 0u;
+
     vec2 uv = TexCoord * 2.0 - 1.0;
     uv.x *= u_aspectRatio;
 
@@ -126,11 +131,12 @@ void main() {
         float diskOuter = bhRadius * 6.0;
         float r = length(loc - bhPos);
 
-        if (abs(loc.y - bhPos.y) < 0.02) {
+        if (abs(loc.y - bhPos.y) < 0.02 && showDisk) {
             if (r > diskInner && r < diskOuter) {
                 float t = (r - diskInner) / (diskOuter - diskInner);
                 vec3 diskColor = mix(vec3(1.0,0.8,0.3), vec3(1.0,0.2,0.0), t);
                 pixelColor = diskColor;
+
                 float redshift = sqrt(max(1.0 - bhRadius / r, 0.0));
                 pixelColor *= redshift;
                 break;
@@ -161,9 +167,11 @@ void main() {
         }
 
         float currentDt = dt * clamp(bhDist * 0.2, 0.02, 5.0);
-
-        // March_Newtonian_RK4(loc, vel, currentDt);
-        March_Geodesic_RK4(loc, vel, currentDt);
+        if  (useRelativity) {
+            March_Geodesic_RK4(loc, vel, currentDt);
+        } else {
+            March_Newtonian_RK4(loc, vel, currentDt);
+        }
     }
 
     FragColor = vec4(pixelColor, 1.0);

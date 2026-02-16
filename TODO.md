@@ -2,13 +2,13 @@
 
 Core Infrastructure
 
-    [ ] Integrate Dear ImGui (Setup GLFW/OpenGL3 backends)
+    [x] Integrate Dear ImGui (Setup GLFW/OpenGL3 backends)
 
-    [ ] Create Debug UI Window (Sliders for bhMass, bhPos, and stepSize)
+    [x] Create Debug UI Window (Sliders for bhMass, bhPos, and stepSize)
 
-    [ ] Camera Controls (Middle-mouse orbit, scroll zoom, and Shift-drag pan)
+    [x] Camera Controls (Middle-mouse orbit, scroll zoom, and Shift-drag pan)
 
-    [ ] FPS & Performance Monitor (Real-time frame time and step count display)
+    [?] FPS & Performance Monitor (Real-time frame time and step count display)
 
 Visual Environment
 
@@ -22,7 +22,7 @@ Visual Environment
 
 Black Hole Features
 
-    [ ] Accretion Disk Geometry (Define inner/outer radii and disk thickness)
+    [x] Accretion Disk Geometry (Define inner/outer radii and disk thickness)
 
     [ ] Disk Texture/Noise (Procedural animated noise for hot gas appearance)
 
@@ -32,7 +32,7 @@ Black Hole Features
 
 Advanced Physics (Relativity)
 
-    [ ] Gravitational Redshift (Shift light frequency based on Rs​/r)
+    [x] Gravitational Redshift (Shift light frequency based on Rs​/r)
 
     [ ] Relativistic Beaming (Adjust disk brightness based on velocity toward/away from camera)
 

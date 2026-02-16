@@ -65,18 +65,20 @@ void Display::Draw() {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Display::UpdateUniforms(const Camera& camera, const BlackHole& bh) {
+void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags) {
     m_ShaderProgram->use();
 
     glm::vec3 camPos = camera.GetPosition();
-    glm::mat4 view = glm::lookAt(camPos, bh.GetPosition(), glm::vec3(0, 1, 0));
+    glm::mat4 view = glm::lookAt(camPos, bh.Position(), glm::vec3(0, 1, 0));
     m_ShaderProgram->setMat4("invView", glm::inverse(view));
     m_ShaderProgram->setVec3("camPos", camPos);
 
-    m_ShaderProgram->setVec3("bhPos", bh.GetPosition());
-    m_ShaderProgram->setFloat("bhMass", bh.GetMass());
-    m_ShaderProgram->setFloat("bhRadius", bh.GetRadius());
+    m_ShaderProgram->setVec3("bhPos", bh.Position());
+    m_ShaderProgram->setFloat("bhMass", bh.Mass());
+    m_ShaderProgram->setFloat("bhRadius", bh.Radius());
 
     float aspectRatio = (float)Config::WINDOW_WIDTH / (float)Config::WINDOW_HEIGHT;
     m_ShaderProgram->setFloat("u_aspectRatio", aspectRatio);
+
+    m_ShaderProgram->setUInt("flags", flags);
 } 

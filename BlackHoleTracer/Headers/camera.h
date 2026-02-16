@@ -9,9 +9,9 @@ public:
     Camera(float radius, float azimuth, float polar) : radius(radius), azimuth(azimuth), polar(polar) {}
     
     // Accessors
-    float GetRadius() const { return radius; }
-    float GetAzimuth() const { return azimuth; }
-    float GetPolar() const { return polar; }
+    float& Radius() { return radius; }
+    float& Azimuth() { return azimuth; }
+    float& Polar() { return polar; }
 
     glm::vec3 GetPosition() const {
         return glm::vec3(

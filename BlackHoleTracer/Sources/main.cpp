@@ -7,21 +7,94 @@
 // System Headers
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 // Headers
 #include <cstdio>
 #include <cstdlib>
 
-bool paused = false;
+bool useRelativity = true;
+bool showDisk = true;
 
 bool isDragging = false;
 double lastX, lastY;
 
+void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Simulation Controls");
+    
+    ImGui::Text("Black Hole Properties");
+    ImGui::SliderFloat("Mass", &blackhole.Mass(), 0.1f, 10.0f);
+    ImGui::Text("Schwarzschild Radius: %.3f", blackhole.Radius());
+    // ImGui::SliderFloat3("Position", &blackhole.Position().x, -10.0f, 10.0f);
+
+    ImGui::Separator();
+    ImGui::Text("Simulation Parameters");
+    ImGui::Checkbox("Use Relativistic Geodesics", &useRelativity);
+    ImGui::Checkbox("Show Accretion Disk", &showDisk);
+    
+    ImGui::Separator();
+
+    ImGui::Text("Camera Properties");
+    ImGui::SliderFloat("Radius", &camera.Radius(), 1.0f, 50.0f);
+    ImGui::SliderFloat("Azimuth", &camera.Azimuth(), -3.14159f, 3.14159f);
+    ImGui::SliderFloat("Polar", &camera.Polar(), 0.0f, 3.14159f);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 
+                1000.0f / io.Framerate, io.Framerate);
+    
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RenderScene(Display& display, Camera& camera, BlackHole& blackhole) {
+    uint32_t flags = 0;
+
+    if (useRelativity) flags |= (1 << 0);
+    if (showDisk) flags |= (1 << 1);
+
+    display.UpdateUniforms(camera, blackhole, flags);
+    display.Draw();
+}
+void PrintTelemetry(double startTime, double endTime, Camera& camera, BlackHole& bh) {
+    double msPerFrame = (endTime - startTime) / 1000.0;
+    double fps = 1.0 / msPerFrame;
+
+    printf("\rCamera: Radius=%.2f, Azimuth=%.2f, Polar=%.2f", 
+           camera.Radius(), 
+           camera.Azimuth(), 
+           camera.Polar()
+        );
+    // printf("Black Hole State: Mass = %.2f, Radius = %.2f, Position = (%.2f, %.2f, %.2f)", 
+    //     bh.GetMass(), 
+    //     bh.Radius(),
+    //     bh.GetPosition().x, 
+    //     bh.GetPosition().y, 
+    //     bh.GetPosition().z);        
+    glm::vec3 camPos = camera.GetPosition();
+    printf(" | Pos: (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
+    printf(" | Frame time: %.6f ms | FPS: %.1f  ", msPerFrame, fps);
+    float distance = glm::distance(camera.GetPosition(), bh.Position());
+    printf(" | Dist: %.2f", distance);
+
+    fflush(stdout);
+}
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
+
     if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
         if (action == GLFW_PRESS) {
             isDragging = true;
-            // Record the starting position so the first movement doesn't "jump"
             glfwGetCursorPos(window, &lastX, &lastY);
         } else {
             isDragging = false;
@@ -30,13 +103,18 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
+
     if (isDragging) {
         float dx = (float)(xpos - lastX);
         float dy = (float)(ypos - lastY);
         
         Camera* cam = (Camera*)glfwGetWindowUserPointer(window);
-        cam->SetAzimuth(cam->GetAzimuth() - dx * 0.01f);
-        cam->SetPolar(cam->GetPolar() - dy * 0.01f);
+        cam->SetAzimuth(cam->Azimuth() - dx * 0.01f);
+        cam->SetPolar(cam->Polar() - dy * 0.01f);
         
         lastX = xpos;
         lastY = ypos;
@@ -44,24 +122,19 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
+
     Camera* cam = (Camera*)glfwGetWindowUserPointer(window);
-    cam->SetRadius (cam->GetRadius() - (float)yoffset * 0.5f); // Adjust sensitivity
-    if (cam->GetRadius() < 1.0f) cam->SetRadius(1.0f); // Don't fly through the BH
+    cam->SetRadius (cam->Radius() - (float)yoffset * 0.5f); // Adjust sensitivity
+    if (cam->Radius() < 1.0f) cam->SetRadius(1.0f); // Don't fly through the BH
 }
 
-void checkKeys(GLFWwindow* mWindow) {
+void CheckKeys(GLFWwindow* mWindow) {
     if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(mWindow, true);
-
-    
-    
-    static bool spaceWasPressed = false;
-    bool spaceIsPressed = glfwGetKey(mWindow, GLFW_KEY_SPACE) == GLFW_PRESS;
-    if (spaceIsPressed && !spaceWasPressed) {
-        paused = !paused;
-        printf("\nState: %s\n", paused ? "ON" : "OFF");
-    }
-    spaceWasPressed = spaceIsPressed;
 }
 
 int main() {
@@ -85,10 +158,19 @@ int main() {
     gladLoadGL();
     fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
 
+    // ImGui Setup
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+    ImGui_ImplOpenGL3_Init("#version 400");
+
     // Initialize scene objects and settings
-    BlackHole blackhole(2.0f, glm::dvec3(0.0f, 0.0f, 0.0f));
+    BlackHole blackhole(2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
     Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
-    Camera camera(20.0f, 0.0f, Constants::PI / 2.0f);
+    Camera camera(40.0f, 0.0f, 1.46f);
 
     // Set glfw pointers 
     glfwSetWindowUserPointer(mWindow, &camera);
@@ -96,41 +178,28 @@ int main() {
     glfwSetCursorPosCallback(mWindow, CursorPosCallback);
     glfwSetMouseButtonCallback(mWindow, MouseButtonCallback);
 
-    printf("Black Hole State: Mass = %.2f, Radius = %.2f, Position = (%.2f, %.2f, %.2f)\n", 
-           blackhole.GetMass(), 
-           blackhole.GetRadius(),
-           blackhole.GetPosition().x, 
-           blackhole.GetPosition().y, 
-           blackhole.GetPosition().z);
-
     // Rendering Loop
     while (glfwWindowShouldClose(mWindow) == false) {
-        checkKeys(mWindow);
+        // double startTime = glfwGetTime();
+        CheckKeys(mWindow);
 
-        double startTime = glfwGetTime();
-            display.UpdateUniforms(camera, blackhole);
-            display.Draw();
+        RenderScene(display, camera, blackhole);
+        RenderImGui(io, camera, blackhole);
 
-            glfwSwapBuffers(mWindow);
-        double endTime = glfwGetTime(); // Capture end time
-        double msPerFrame = (endTime - startTime) / 1000.0;
-        double fps = 1.0 / msPerFrame;
-        printf("\rCamera: Radius=%.2f, Azimuth=%.2f, Polar=%.2f", 
-               camera.GetRadius(), 
-               camera.GetAzimuth(), 
-               camera.GetPolar()
-            );        
-        glm::vec3 camPos = camera.GetPosition();
-        printf(" | Pos: (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
-        printf(" | Frame time: %.6f ms | FPS: %.1f  ", msPerFrame, fps);
-        float distance = glm::distance(camera.GetPosition(), blackhole.GetPosition());
-        printf(" | Dist: %.2f", distance);
 
-        fflush(stdout);
+        // double endTime = glfwGetTime();
 
+        // PrintTelemetry(startTime, endTime, camera, blackhole);
+
+        glfwSwapBuffers(mWindow);
         glfwPollEvents();
     }   
     
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
     return EXIT_SUCCESS;
 }

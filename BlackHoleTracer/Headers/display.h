@@ -13,7 +13,7 @@ public:
     
     // Main interface
     void Draw();
-    void UpdateUniforms(const Camera& camera, const BlackHole& bh);
+    void UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags);
     
     // Utility
     int GetWidth() const { return m_Width; }
