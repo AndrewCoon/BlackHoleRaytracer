@@ -1,0 +1,41 @@
+# ToDo
+
+Core Infrastructure
+
+    [ ] Integrate Dear ImGui (Setup GLFW/OpenGL3 backends)
+
+    [ ] Create Debug UI Window (Sliders for bhMass, bhPos, and stepSize)
+
+    [ ] Camera Controls (Middle-mouse orbit, scroll zoom, and Shift-drag pan)
+
+    [ ] FPS & Performance Monitor (Real-time frame time and step count display)
+
+Visual Environment
+
+    [ ] HDR Skybox Implementation (Switch from checkerboard to equirectangular star map)
+
+    [ ] Spacetime Curvature Grid (World-space coordinate mapping in shader)
+
+    [ ] Second Light-Emitting Object (Implement a movable sphere/point light)
+
+    [ ] 3D Scene Objects (Add simple geometric shapes to observe gravitational lensing)
+
+Black Hole Features
+
+    [ ] Accretion Disk Geometry (Define inner/outer radii and disk thickness)
+
+    [ ] Disk Texture/Noise (Procedural animated noise for hot gas appearance)
+
+    [ ] Volumetric Disk Rendering (Integrate disk density along the ray path)
+
+    [ ] Shadow of the Event Horizon (Refine the "photon sphere" boundary)
+
+Advanced Physics (Relativity)
+
+    [ ] Gravitational Redshift (Shift light frequency based on Rs​/r)
+
+    [ ] Relativistic Beaming (Adjust disk brightness based on velocity toward/away from camera)
+
+    [ ] Doppler Shift (Color-shift disk pixels based on orbital velocity)
+
+    [ ] Secondary/Tertiary Images (Optimize steps to capture light loops around the BH)
