@@ -25,24 +25,6 @@ vec3 NewtonianAcceleration(vec3 loc) {
     return G * bhMass * dir / d3;
 }
 
-vec3 PosToSpherical(vec3 pos) {
-    float r = length(pos);
-    float theta = acos(pos.z / r);
-    float phi = atan(pos.y, pos.x);
-
-    return vec3(r, theta, phi);
-}
-
-vec3 VelToSpherical(vec3 vel, vec3 pos) {
-    float r = length(pos);
-    
-    float vr = (vel.x * pos.x + vel.y * pos.y + vel.z * pos.z) / r;
-    float theta = (pos.x * vel.x + pos.y * vel.y) / r;
-    float phi = (-1.0 * pos.x * vel.x + pos.y * vel.y) / (r  * sin(theta));
-
-    return vec3(r, theta, phi);
-}
-
 vec3 ToCartesian(vec3 vec) {
     float r = vec.x;
     float theta = vec.y;
@@ -127,7 +109,7 @@ void main() {
     for (int i = 0; i < MAX_STEPS; i++) {
         float bhDist = length(loc - bhPos);
 
-        float diskInner = bhRadius * 1.5;
+        float diskInner = bhRadius * 2;
         float diskOuter = bhRadius * 6.0;
         float r = length(loc - bhPos);
 
