@@ -1,6 +1,7 @@
 ## Getting Started
 ```bash
 # Microsoft Windows
+cd Build
 cmake -S .. -B .
 ...
 ```
