@@ -67,7 +67,7 @@ void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole, Display& dis
     ImGui::Begin("Simulation Controls");
     
     if (ImGui::Button("Save Frame")) {
-        display.SaveFrame("../../../Output/output.png");
+        display.SaveFrame("output.png");
     }
     ImGui::Separator();
 
@@ -220,7 +220,7 @@ int main() {
     // Initialize scene objects and settings
     BlackHole blackhole(2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
     Display display(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, SKYBOX_PATH);
-    Camera camera(40.0f, 0.0f, 1.46f);
+    Camera camera(40.0f, 1.46f, 1.46f);
 
     // Set glfw pointers 
     glfwSetWindowUserPointer(mWindow, &camera);

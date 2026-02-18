@@ -5,6 +5,9 @@
 #include "display.h"
 #include <iostream>
 #include <vector>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 
 Display::Display(int width, int height, const std::string& skyboxPath) 
     : m_Width(width), m_Height(height) {
@@ -126,11 +129,17 @@ void Display::SaveFrame(const std::string& filename) {
     std::vector<unsigned char> pixels(m_Width * m_Height * 3);
     glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
 
+    auto now = std::time(nullptr);
+    auto tm = *std::localtime(&now);
+    std::ostringstream oss;
+    oss << "../../../Output/" << std::put_time(&tm, "%Y-%m-%d-%H-%M-") << filename;
+    std::string timestampedFilename = oss.str();
+
     stbi_flip_vertically_on_write(true);
-    if (stbi_write_png(filename.c_str(), m_Width, m_Height, 3, pixels.data(), m_Width * 3)) {
-        std::cout << "Saved frame to: " << filename << std::endl;
+    if (stbi_write_png(timestampedFilename.c_str(), m_Width, m_Height, 3, pixels.data(), m_Width * 3)) {
+        std::cout << "Saved frame to: " << timestampedFilename << std::endl;
     } else {
-        std::cerr << "Failed to save frame: " << filename << std::endl;
+        std::cerr << "Failed to save frame: " << timestampedFilename << std::endl;
     }
 }
      
