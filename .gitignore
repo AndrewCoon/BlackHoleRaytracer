@@ -1,2 +1,4 @@
 [Bb]uild/
 .vscode
+imgui.ini
+package-lock.json
