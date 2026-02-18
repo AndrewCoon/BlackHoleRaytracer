@@ -59,13 +59,18 @@ void InitializeScene() {
     }
 }
 
-void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole) {
+void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole, Display& display) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImGui::Begin("Simulation Controls");
     
+    if (ImGui::Button("Save Frame")) {
+        display.SaveFrame("../../../Output/output.png");
+    }
+    ImGui::Separator();
+
     ImGui::Text("Black Hole Properties");
     ImGui::SliderFloat("Mass", &blackhole.Mass(), 0.1f, 10.0f);
     ImGui::Text("Schwarzschild Radius: %.3f", blackhole.Radius());
@@ -225,16 +230,10 @@ int main() {
 
     // Rendering Loop
     while (glfwWindowShouldClose(mWindow) == false) {
-        // double startTime = glfwGetTime();
         CheckKeys(mWindow);
 
         RenderScene(display, camera, blackhole);
-        RenderImGui(io, camera, blackhole);
-
-
-        // double endTime = glfwGetTime();
-
-        // PrintTelemetry(startTime, endTime, camera, blackhole);
+        RenderImGui(io, camera, blackhole, display);
 
         glfwSwapBuffers(mWindow);
         glfwPollEvents();

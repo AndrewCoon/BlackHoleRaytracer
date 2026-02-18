@@ -14,9 +14,10 @@ public:
     
     // Main interface
     void Draw();
-    void UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags, float& bhSizeBuffer);
-    
-    // Utility
+    void UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags, float& bhSizeBuffer, float& diskThickness);
+    void SaveFrame(const std::string& filename);
+
+    // Getters
     int GetWidth() const { return m_Width; }
     int GetHeight() const { return m_Height; }
     Shader* GetShader() const { return m_ShaderProgram; }

@@ -1,7 +1,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 #include "display.h"
 #include <iostream>
+#include <vector>
 
 Display::Display(int width, int height, const std::string& skyboxPath) 
     : m_Width(width), m_Height(height) {
@@ -95,7 +98,7 @@ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags, float& bhSizeBuffer) {
+void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags, float& bhSizeBuffer, float& diskThickness) {
     m_ShaderProgram->use();
 
     glm::vec3 camPos = camera.GetPosition();
@@ -113,7 +116,21 @@ void Display::UpdateUniforms(Camera& camera, BlackHole& bh, uint32_t& flags, flo
     m_ShaderProgram->setFloat("u_aspectRatio", aspectRatio);
 
     m_ShaderProgram->setFloat("bhSizeBuffer", bhSizeBuffer);
-
+    m_ShaderProgram->setFloat("diskThickness", diskThickness);
+    
     m_ShaderProgram->setUInt("flags", flags);
     m_ShaderProgram->setInt("u_skybox", 0);
-} 
+}
+
+void Display::SaveFrame(const std::string& filename) {
+    std::vector<unsigned char> pixels(m_Width * m_Height * 3);
+    glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+
+    stbi_flip_vertically_on_write(true);
+    if (stbi_write_png(filename.c_str(), m_Width, m_Height, 3, pixels.data(), m_Width * 3)) {
+        std::cout << "Saved frame to: " << filename << std::endl;
+    } else {
+        std::cerr << "Failed to save frame: " << filename << std::endl;
+    }
+}
+     
