@@ -21,6 +21,7 @@
 const std::string SKYBOX_PATH = "assets/eso0926a - eagle nebula.hdr";
 GLuint skyboxTextureID;
 
+float diskThickness = 0.2f;
 float bhSizeBuffer = 1.08f;
 bool useRelativity = true;
 bool showDisk = true;
@@ -69,8 +70,11 @@ void RenderImGui(ImGuiIO& io, Camera& camera, BlackHole& blackhole) {
     ImGui::SliderFloat("Mass", &blackhole.Mass(), 0.1f, 10.0f);
     ImGui::Text("Schwarzschild Radius: %.3f", blackhole.Radius());
     ImGui::SliderFloat("Size Buffer", &bhSizeBuffer, 1.0f, 1.5f);
-
+    ImGui::Text("Position: (%.2f, %.2f, %.2f)", blackhole.Position().x, blackhole.Position().y, blackhole.Position().z);
+    ImGui::SliderFloat("Disk Thickness", &diskThickness, 0.0f, 1.0f);
+    
     ImGui::Separator();
+    
     ImGui::Text("Simulation Parameters");
     ImGui::Checkbox("Use Relativistic Geodesics", &useRelativity);
     ImGui::Checkbox("Show Accretion Disk", &showDisk);
@@ -98,9 +102,10 @@ void RenderScene(Display& display, Camera& camera, BlackHole& blackhole) {
     if (useRelativity) flags |= (1 << 0);
     if (showDisk) flags |= (1 << 1);
 
-    display.UpdateUniforms(camera, blackhole, flags, bhSizeBuffer);
+    display.UpdateUniforms(camera, blackhole, flags, bhSizeBuffer, diskThickness);
     display.Draw();
 }
+
 void PrintTelemetry(double startTime, double endTime, Camera& camera, BlackHole& bh) {
     double msPerFrame = (endTime - startTime) / 1000.0;
     double fps = 1.0 / msPerFrame;

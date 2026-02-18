@@ -7,6 +7,7 @@ uniform uint flags;
 uniform vec3 camPos;
 uniform mat4 invView;
 
+uniform float diskThickness;
 uniform float bhSizeBuffer;
 
 uniform sampler2D u_skybox; 
@@ -25,7 +26,7 @@ const float G = 1.0;
 const float c = 1.0;
 const float dt = 0.05;
 const float PI = 3.14159265359;
-const int MAX_STEPS = 10000;
+const int MAX_STEPS = 4000;
 
 vec3 NewtonianAcceleration(vec3 loc) {
     vec3 dir = bhPos - loc;
@@ -47,12 +48,13 @@ vec3 ToCartesian(vec3 vec) {
 }
 
 vec3 GeodesicAcceleration(vec3 loc, vec3 vel) {
-    float r = length(loc);
+    vec3 relativeLoc = loc - bhPos;
+    float r = length(relativeLoc);
     r = max(r, 0.001);
 
     float factor = 1.0 - bhRadius / r;
 
-    vec3 nLoc = loc / r;
+    vec3 nLoc = relativeLoc / r;
 
     vec3 dVel = -1.5 * (G * bhMass / (r * r * factor)) * (dot(vel, vel) / (c * c) - factor) * nLoc;
     
@@ -122,42 +124,52 @@ void main() {
     
     vec3 loc = camPos;
     vec3 vel = rayDir * c;
-
-    vec3 pixelColor = vec3(1.0);
+    
+    vec3 pixelColor = vec3(1.0, 0.0, 0.0);
+    float transmission = 1.0;
+    vec3 accumulatedColor = vec3(0.0);
 
     for (int i = 0; i < MAX_STEPS; i++) {
         float bhDist = length(loc - bhPos);
 
-        float diskInner = bhRadius * 2;
+        float diskInner = bhRadius * 2.0;
         float diskOuter = bhRadius * 6.0;
 
-        if (abs(loc.y - bhPos.y) < (0.01) && showDisk) {
-            if (bhDist > diskInner && bhDist < diskOuter) {
-                float t = (bhDist - diskInner) / (diskOuter - diskInner);
-                vec3 diskColor = mix(vec3(1.0, 0.7, 0.2), vec3(0.5, 0.1, 0.0), t);
-                
-                // Simple gravitational redshift for the disk
-                float redshift = sqrt(max(1.0 - bhRadius / bhDist, 0.01));
-                pixelColor = diskColor * redshift * 2.0;
-                break;
-            }
-        }
-
+        // BlackHole Collision
         if (bhDist < bhRadius * bhSizeBuffer) {
-            pixelColor = vec3(0.0);
-            break;
+        FragColor = vec4(accumulatedColor, 1.0); // Keep what we found, but hit black
+        return;
         }
 
+        // Escape
         if (bhDist > 100.0) {
             vec2 skyUV = DirectionToUV(normalize(vel));
             pixelColor = texture(u_skybox, skyUV).rgb;
 
-            float redshift = sqrt(max(1.0 - bhRadius / bhDist, 0.05));
-            pixelColor *= redshift;
+            float redshift = sqrt(1.0 - bhRadius / bhDist);
+            pixelColor /= max(redshift, 0.01);
             break;
         }
 
-        float currentDt = dt * clamp(bhDist * 0.5, 0.1, 10.0);
+        float currentDt = dt * clamp(bhDist * 0.5, 0.05, 5.0);
+
+        // Disk Collision
+        if(bhDist > diskInner && bhDist < diskOuter && showDisk) {
+            float height = abs(loc.y - bhPos.y);
+            float density = exp(-(height * height) / (diskThickness * diskThickness));
+
+            float radialT = (bhDist - diskInner) / (diskOuter - diskInner);
+            density *= 1.0 - radialT;
+
+            vec3 diskColor = mix(vec3(1.0, 0.7, 0.2), vec3(0.5, 0.1, 0.0), radialT);
+            
+            float stepOpacity = density * currentDt * 2.0; 
+            accumulatedColor += transmission * diskColor * stepOpacity;
+            transmission *= max(0.0, 1.0 - stepOpacity);
+        }
+
+        if (transmission < 0.01) break;
+
         if  (useRelativity) {
             March_Geodesic_RK4(loc, vel, currentDt);
         } else {
@@ -165,6 +177,7 @@ void main() {
         }
     }
 
+    pixelColor = mix(pixelColor, accumulatedColor, 1.0 - transmission);
     pixelColor = pixelColor / (pixelColor + vec3(1.0));
     pixelColor = pow(pixelColor, vec3(1.0 / 2.2));
 
