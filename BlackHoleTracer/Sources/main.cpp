@@ -24,7 +24,7 @@ GLuint skyboxTextureID;
 float diskThickness = 0.2f;
 float bhSizeBuffer = 1.08f;
 bool useRelativity = true;
-bool showDisk = true;
+bool showDisk = false;
 
 bool isDragging = false;
 double lastX, lastY;
