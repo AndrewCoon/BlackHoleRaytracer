@@ -26,4 +26,4 @@ Functionality           | Library
 OpenGL Function Loader  | [glad](https://github.com/Dav1dde/glad)
 Windowing and Input     | [glfw](https://github.com/glfw/glfw)
 OpenGL Mathematics      | [glm](https://github.com/g-truc/glm)
-ImGui          k
+ImGui                   | [imgui](https://github.com/ocornnut/imgui)
