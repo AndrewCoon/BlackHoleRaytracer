@@ -13,11 +13,16 @@ cmake -S .. -B .
 ...
 ```
 ## Example photos
+The background is an [image of the Eagle Nebula from the ESO](https://www.eso.org/public/images/eso0926a/) that is wrapped around the blackhole. Any image could be added.
+
+Fake Accretion Disk (on the seam of the image)
 ![Alt text](/../master/Examples/2026-02-17-21-11-output.png?raw=true "")
 ![Alt text](/../master/Examples/2026-02-17-21-14-output.png?raw=true "")
+Very Small Blackhole Mass
 ![Alt text](/../master/Examples/2026-02-21-17-25-output.png?raw=true "")
-![Alt text](/../master/Examples/2026-02-21-17-26-output.png?raw=true "")
 ![Alt text](/../master/Examples/2026-02-21-17-27-output.png?raw=true "")
+Newtonian Acceleration of Light
+![Alt text](/../master/Examples/2026-02-21-17-26-output.png?raw=true "")
 
 ## Documentationa
 
